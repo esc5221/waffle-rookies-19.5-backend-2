@@ -21,6 +21,7 @@ class CustomException(APIException):
 class SeminarSerializer(serializers.ModelSerializer):
     instructors = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
+    time = serializers.TimeField(format='%H:%M')
 
     class Meta:
         model = Seminar
