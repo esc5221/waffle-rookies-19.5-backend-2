@@ -148,10 +148,8 @@ class ParticipantProfileSerializer(serializers.ModelSerializer):
             'accepted'
         )
     def validate(self, data):
-        print("accepted ? : ", data.get('accepted', None))
         if data.get('accepted', None)== None:
             data.update({'accepted' : True})
-        print(data)
         return {
             'university': data.get("university") or "",
             'accepted': data.get("accepted")

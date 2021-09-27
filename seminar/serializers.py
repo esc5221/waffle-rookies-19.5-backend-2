@@ -70,6 +70,40 @@ class SeminarSerializer(serializers.ModelSerializer):
         return response
 
     def validate(self, data):
+        user = data.get('user_id', None)
+        name = data.get('name', None)
+        capacity = data.get('capacity', None)
+        count = data.get('count', None)
+        time = data.get('time', None)
+        attrs = ['name', 'capacity', 'count', 'time']
+
+        
+
+        if data.get('online', None)== None:
+            data.update({'online' : True})
+
+        role = data.get('role')
+        user = User.objects.get(id=user_id)
+        instructing_seminars = UserSeminar.objects.filter(user=user_id, role='instructor')
+        participants = UserSeminar.objects.filter(seminar=seminar_id, role='participant')
+
+        if user_id == None:
+            raise CustomException("로그인이 필요합니다.", status.HTTP_403_FORBIDDEN)
+        if role != 'instructor':
+            raise CustomException("instructor가 아닙니다.", status.HTTP_400_BAD_REQUEST)
+        if getattr(user,role) == None:
+            raise CustomException(role, " 자격이 없습니다.", status.HTTP_403_FORBIDDEN)
+        if role == 'instructor' and instructing_seminars.exists():
+            raise CustomException("이미 다른 세미나의 instructor입니다", status.HTTP_400_BAD_REQUEST)
+        if role == 'participant' and user.participant.accepted is False :
+            raise CustomException("accepted되지 않았습니다.", status.HTTP_403_FORBIDDEN)
+        if participants.count()+1 > Seminar.objects.get(id=seminar_id).capacity:
+            raise CustomException("세미나 정원이 찼습니다.", status.HTTP_400_BAD_REQUEST)
+        if already_signed == True:
+            if is_active == False:
+                raise CustomException("드랍한 세미나는 다시 참여할 수 없습니다.", status.HTTP_400_BAD_REQUEST)
+            raise CustomException("이미 해당 세미나에 참여 중입니다.", status.HTTP_400_BAD_REQUEST)
+
         return data
 
     def create(self, validated_data):
