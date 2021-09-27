@@ -39,12 +39,10 @@ class UserCreateSerializer(serializers.Serializer):
         if not role or ( role.split(",")[0] not in ['instructor', 'participant'] ):
             raise serializers.ValidationError("role이 지정되지 않았습니다.")
         data.update({'role' : role.replace(" ", "")})
-        print(data.get('role'))
         if bool(first_name) ^ bool(last_name):
             raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
         if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
             raise serializers.ValidationError("이름에 숫자가 들어갈 수 없습니다.")
-        print(data)
         return data
 
     def create(self, validated_data):

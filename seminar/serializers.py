@@ -88,7 +88,6 @@ class SeminarSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        print(validated_data)
         return super().create(validated_data)
 
 class SeminarNameSerializer(SeminarSerializer):
