@@ -38,6 +38,8 @@ class UserCreateSerializer(serializers.Serializer):
         role = data.get('role')
         if not role or ( role.split(",")[0] not in ['instructor', 'participant'] ):
             raise serializers.ValidationError("role이 지정되지 않았습니다.")
+        data.update({'role' : role.replace(" ", "")})
+        print(data.get('role'))
         if bool(first_name) ^ bool(last_name):
             raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
         if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
@@ -190,12 +192,12 @@ class UserWithSeminarSerializer(UserSerializer):
         return None
 
 class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
-    seminar = serializers.SerializerMethodField()
+    seminars = serializers.SerializerMethodField()
     class Meta(ParticipantProfileSerializer.Meta):
         fields = ParticipantProfileSerializer.Meta.fields \
-                + ('seminar',)
+                + ('seminars',)
 
-    def get_seminar(self, participant):
+    def get_seminars(self, participant):
         queryset = Seminar.objects.filter(userseminar__role='participant',userseminar__user__participant=participant.id)
         response = queryset.annotate(
             joined_at=F('userseminar__joined_at'),
@@ -211,12 +213,12 @@ class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
         return response
 
 class InstructorProfileWithSeminarSerializer(InstructorProfileSerializer):
-    seminar = serializers.SerializerMethodField()
+    seminars = serializers.SerializerMethodField()
     class Meta(InstructorProfileSerializer.Meta):
         fields = InstructorProfileSerializer.Meta.fields \
-                + ('seminar',)
+                + ('seminars',)
 
-    def get_seminar(self, instructor):
+    def get_seminars(self, instructor):
         queryset = Seminar.objects.filter(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
         response = queryset.annotate(
             joined_at=F('userseminar__joined_at')

@@ -5,7 +5,7 @@ _________________________________________
 
 
 ### ㄹㄷ 
-- 
+- ****
 - `waffle-rookies-19.5-backend-2`의 `README.md`에 과제 관련 하고 싶은 말, 어려웠던 점 등을 남겨주세요. 물론 적극적으로 해결되어야 할 피드백이나
 질문 사항은 [Issues](https://github.com/wafflestudio/19.5-rookies/issues) 등을 이용해주세요!
 - `GET /api/v1/seminar/` API에 관련해, Django Debug Toolbar를 이용하여 query를 보고 스크린샷과 함께 느낀 점이나 이를 통해 조금이라도 query를 개선한 부분을 남겨주세요.

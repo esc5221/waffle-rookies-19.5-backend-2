@@ -105,12 +105,12 @@ class UserViewSet(viewsets.GenericViewSet):
         except Exception as e: 
             return Response(status=status.HTTP_400_BAD_REQUEST, data=e.detail)      
 ##
-        return Response(status=status.HTTP_200_OK, data='유저 정보가 정상적으로 수정되었습니다.')
+        return Response(UserWithSeminarSerializer(user).data)
 
     def retrieve(self, request, pk=None):
 
         if request.user.is_anonymous:
-            return Response(status=status.HTTP_403_FORBIDDEN, data='먼저 로그인 하세요.')
+            return Response(status=status.HTTP_403_FORBIDDEN, data='로그인이 필요합니다.')
 
         user = request.user if pk == 'me' else self.get_object()
         return Response(UserWithSeminarSerializer(user).data)

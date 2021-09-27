@@ -7,7 +7,7 @@ class Seminar(models.Model):
     capacity = models.PositiveIntegerField()
     count = models.PositiveIntegerField()
     time = models.TimeField()
-    online = models.BooleanField(default=True)
+    online = models.BooleanField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     participant_count = models.PositiveIntegerField(default=0)

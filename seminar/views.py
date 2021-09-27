@@ -1,6 +1,7 @@
 from datetime import time
 from functools import partial
 from re import S
+from user.serializers import User
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from rest_framework import serializers, status, viewsets, permissions
@@ -71,7 +72,8 @@ class SeminarViewSet(viewsets.GenericViewSet):
             us_serializer = UserSeminarSerializer(data=us_data)
             us_serializer.is_valid(raise_exception=True)
             us_serializer.save()
-            seminar.participant_count += 1
+            if data.get('role') == 'participant' :
+                seminar.participant_count += 1
             seminar.save()
             return Response(self.get_serializer(seminar).data,status=status.HTTP_201_CREATED)
 
@@ -102,16 +104,19 @@ class SeminarViewSet(viewsets.GenericViewSet):
             return Response(self.get_serializer(seminar).data,status=status.HTTP_200_OK)
 
     def create(self, request):
+        if request.user.is_anonymous:
+            return Response(status=status.HTTP_403_FORBIDDEN, data='로그인이 필요합니다.')
+
         roles = request.user.role.split(",")
         check_ins = False
         for role in roles:
             if role == "instructor":
                 check_ins = True
-        if check_ins is False : 
+        if check_ins is False :
             return Response(status=status.HTTP_403_FORBIDDEN, data='Instructor가 아닙니다.')
 
         data = request.data.copy()
-        data.update({'user' : request.user.id})
+        data.update({'user_id' : request.user.id})
         data.update({'participant_count' : 0})
 
         serializer = self.get_serializer(data=data)
@@ -143,4 +148,4 @@ class SeminarViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.update(userseminar.seminar, serializer.validated_data)
         
-        return Response(status=status.HTTP_200_OK, data='세미나 정보가 정상적으로 수정되었습니다.')
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
