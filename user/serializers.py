@@ -1,14 +1,9 @@
 from abc import ABC
-from seminar.models import Seminar
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import update_last_login
-from django.db.models import F
-
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
-
-from user.models import ParticipantProfile, InstructorProfile
 
 # 토큰 사용을 위한 기본 세팅
 User = get_user_model()
@@ -24,32 +19,23 @@ def jwt_token_of(user):
 
 
 class UserCreateSerializer(serializers.Serializer):
-    instructor = serializers.SerializerMethodField()
-    participant = serializers.SerializerMethodField()
 
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
-    role = serializers.CharField(required=True)
-    
+
     def validate(self, data):
         first_name = data.get('first_name')
         last_name = data.get('last_name')
-        role = data.get('role')
-        if not role or ( role.split(",")[0] not in ['instructor', 'participant'] ):
-            raise serializers.ValidationError("role이 지정되지 않았습니다.")
         if bool(first_name) ^ bool(last_name):
             raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
         if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
             raise serializers.ValidationError("이름에 숫자가 들어갈 수 없습니다.")
-        print(data)
         return data
 
     def create(self, validated_data):
         # TODO (1. 유저 만들고 (ORM) , 2. 비밀번호 설정하기; 아래 코드를 수정해주세요.)
-        roles = validated_data['role'].split(",")
-        user = User.objects.create_user(**validated_data)
-
+        user = None
         return user, jwt_token_of(user)
 
 
@@ -75,8 +61,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    instructor = serializers.SerializerMethodField()
-    participant = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -86,145 +70,13 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'password',
-            'first_name',
-            'last_name',
             'last_login',  # 가장 최근 로그인 시점
             'date_joined',  # 가입 시점
-            'participant',
-            'instructor'
+            'first_name',
+            'last_name'
         )
         extra_kwargs = {'password': {'write_only': True}}
-
-    def get_participant(self, user):
-        if user.participant:
-            return ParticipantProfileSerializer(user.participant, context=self.context).data
-        return None
-
-    def get_instructor(self, user):
-        if user.instructor:
-            return InstructorProfileSerializer(user.instructor, context=self.context).data
-        return None
 
     def create(self, validated_data):
         user = super().create(validated_data)
         return user
-
-class UserInstructorSerializer(serializers.Serializer):
-    joined_at = serializers.ReadOnlyField(source='userseminar')
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'joined_at'
-        )
-
-class UserParticipantSerializer(serializers.Serializer):
-    joined_at = serializers.ReadOnlyField(source='userseminar')
-    is_active = serializers.ReadOnlyField(source='userseminar')
-    dropped_at = serializers.ReadOnlyField(source='userseminar')
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'joined_at',
-            'is_active',
-            'dropped_at'
-        )
-
-class ParticipantProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParticipantProfile
-        fields = (
-            'id',
-            'university',
-            'accepted'
-        )
-    def validate(self, data):
-        print("accepted ? : ", data.get('accepted', None))
-        if data.get('accepted', None)== None:
-            data.update({'accepted' : True})
-        print(data)
-        return {
-            'university': data.get("university") or "",
-            'accepted': data.get("accepted")
-        }
-
-    def create(self, validated_data):
-        participant = super().create(validated_data)
-        return participant
-
-class InstructorProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InstructorProfile
-        fields = (
-            'id',
-            'company',
-            'year'
-        )
-
-    def validate(self, data):
-        if data.get('year')!=None :
-            if not int(data.get('year')) > 0:
-                raise serializers.ValidationError("연차가 양수가 아닙니다.")
-        return data
-
-    def create(self, validated_data):
-        instructor = super().create(validated_data)
-        return instructor
-
-class UserWithSeminarSerializer(UserSerializer):
-    def get_participant(self, user):
-        if user.participant:
-            return ParticipantProfileWithSeminarSerializer(user.participant).data
-        return None
-
-    def get_instructor(self, user):
-        if user.instructor:
-            return InstructorProfileWithSeminarSerializer(user.instructor).data
-        return None
-
-class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
-    seminar = serializers.SerializerMethodField()
-    class Meta(ParticipantProfileSerializer.Meta):
-        fields = ParticipantProfileSerializer.Meta.fields \
-                + ('seminar',)
-
-    def get_seminar(self, participant):
-        queryset = Seminar.objects.filter(userseminar__role='participant',userseminar__user__participant=participant.id)
-        response = queryset.annotate(
-            joined_at=F('userseminar__joined_at'),
-            is_active=F('userseminar__is_active'),
-            dropped_at=F('userseminar__dropped_at')
-            ).values(
-                'id',
-                'name',
-                'joined_at',
-                'is_active',
-                'dropped_at'
-                )
-        return response
-
-class InstructorProfileWithSeminarSerializer(InstructorProfileSerializer):
-    seminar = serializers.SerializerMethodField()
-    class Meta(InstructorProfileSerializer.Meta):
-        fields = InstructorProfileSerializer.Meta.fields \
-                + ('seminar',)
-
-    def get_seminar(self, instructor):
-        queryset = Seminar.objects.filter(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
-        response = queryset.annotate(
-            joined_at=F('userseminar__joined_at')
-            ).values(
-                'id',
-                'name',
-                'joined_at'
-                )
-        return response

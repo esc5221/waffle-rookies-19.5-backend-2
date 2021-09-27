@@ -14,8 +14,6 @@ import datetime
 import os
 from pathlib import Path
 
-SITE_ID = 2
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -45,9 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
     'rest_framework.authtoken',
     'survey.apps.SurveyConfig',
-    'user.apps.UserConfig',
-    'seminar.apps.SeminarConfig',
-    'debug_toolbar'
+    'user.apps.UserConfig'
 ]
 
 MIDDLEWARE = [
@@ -58,7 +54,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 if DEBUG_TOOLBAR:
