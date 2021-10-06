@@ -105,6 +105,18 @@ class UserSerializer(serializers.ModelSerializer):
             return InstructorProfileSerializer(user.instructor, context=self.context).data
         return None
 
+    def validate(self, data):
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        year = data.get('year')
+        if bool(first_name) ^ bool(last_name):
+            raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
+        if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
+            raise serializers.ValidationError("이름에 숫자가 들어갈 수 없습니다.")
+        if year and year <= 0:
+            raise serializers.ValidationError("year; 양의 정수만 가능합니다.")
+        return super().validate(data)
+    
     def create(self, validated_data):
         user = super().create(validated_data)
         return user
