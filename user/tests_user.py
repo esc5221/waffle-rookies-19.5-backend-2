@@ -61,7 +61,6 @@ class PostUserTestCase(TestCase):
             'role': 'participant'
         }
 
-    @tag('bad')
     def test_post_user_중복(self):
         data = self.post_data
         with transaction.atomic():
@@ -249,3 +248,187 @@ class PutUserMeTestCase(TestCase):
 
         instructor_user = User.objects.get(username='inst123')
         self.assertEqual(instructor_user.email, 'bdv111@naver.com')
+
+
+# POST /api/v1/user/login/
+class PostUserLogin(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_1 = UserFactory(
+            username='part',
+            password='password',
+            first_name='first_1',
+            last_name='last_1',
+            email='user_1@snu.ac.kr',
+            is_participant=True
+        )
+        cls.user_1_rawtoken = jwt_token_of(User.objects.get(email='user_1@snu.ac.kr'))
+
+        cls.post_data = {
+            'email': 'user_1@snu.ac.kr',
+            'password': 'password'
+        }
+
+    def test_get_user(self):
+        response = self.client.post('/api/v1/login/', 
+                                    content_type='application/json',
+                                    data=self.post_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data['token'], self.user_1_rawtoken)
+
+
+# GET /api/v1/user/{user_id}/
+class GetUser(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_1 = UserFactory(
+            username='part',
+            password='password',
+            first_name='first_1',
+            last_name='last_1',
+            email='user_1@snu.ac.kr',
+            is_participant=True
+        )
+        cls.user_1.participant.university = '서울대학교'
+        cls.user_1.participant.save()
+        cls.user_1_token = 'JWT ' + jwt_token_of(User.objects.get(email='user_1@snu.ac.kr'))
+
+        cls.user_2 = UserFactory(
+            username='inst',
+            password='password',
+            first_name='first_2',
+            last_name='last_2',
+            email='user_2@snu.ac.kr',
+            is_instructor=True
+        )
+        cls.user_2_token = 'JWT ' + jwt_token_of(User.objects.get(email='user_2@snu.ac.kr'))
+        cls.user_3 = UserFactory(
+            username='partinst',
+            password='password',
+            first_name='first_3',
+            last_name='last_3',
+            email='user_3@snu.ac.kr',
+            is_instructor=True,
+            is_participant=True
+        )
+        cls.user_3_token = 'JWT ' + jwt_token_of(User.objects.get(email='user_3@snu.ac.kr'))
+        cls.username_list = ['part', 'inst', 'partinst']
+
+    def test_get_user(self):
+        for i in range(1,3):
+            response = self.client.get('/api/v1/user/me/', 
+                                      content_type='application/json', 
+                                      HTTP_AUTHORIZATION=getattr(self,f"user_{i}_token"))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            data = response.json()
+            self.assertEqual(data['username'], self.username_list[i-1])
+            self.assertEqual(data['email'], f"user_{i}@snu.ac.kr")
+            self.assertEqual(data['first_name'], f'first_{i}')
+            self.assertEqual(data['last_name'], f'last_{i}')
+            self.assertIn("last_login", data)
+            self.assertIn("date_joined", data)
+
+# GET /api/v1/user/me/
+class GetUserme(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# POST /api/v1/user/participant/
+class PostUserParticipant(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# POST /api/v1/seminar/
+class PostSeminar(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# PUT /api/v1/seminar/{seminar_id}/
+class PutSeminar(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# GET /api/v1/seminar/{seminar_id}/
+class GetSeminar(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# GET /api/v1/seminar/
+class GetSeminarList(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# POST /api/v1/seminar/{seminar_id}/user/
+class PostSeminarUser(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
+
+# DELETE /api/v1/seminar/{seminar_id}/user/
+class DeleteSeminaruser(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.participant = UserFactory(
+            username='part',
+            password='password',
+            first_name='Davin',
+            last_name='Byeon',
+            email='bdv111@snu.ac.kr',
+            is_participant=True
+        )
