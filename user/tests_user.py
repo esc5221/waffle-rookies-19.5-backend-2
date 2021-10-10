@@ -434,15 +434,3 @@ class PostUserParticipant(TestCase):
                                     content_type='application/json', 
                                     HTTP_AUTHORIZATION=self.inst_1_token)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )

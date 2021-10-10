@@ -135,12 +135,12 @@ class SeminarApplySerializer(serializers.Serializer):
         if role not in ['participant','instructor'] :
             raise CustomException("role이 잘못되었습니다.", status.HTTP_400_BAD_REQUEST)
         if getattr(user,role) == None:
-            raise CustomException(role, " 자격이 없습니다.", status.HTTP_403_FORBIDDEN)
+            raise CustomException(f"{role}의 자격이 없습니다.", status.HTTP_403_FORBIDDEN)
         if role == 'instructor' and instructing_seminars.exists():
             raise CustomException("이미 다른 세미나의 instructor입니다", status.HTTP_400_BAD_REQUEST)
         if role == 'participant' and user.participant.accepted is False :
             raise CustomException("accepted되지 않았습니다.", status.HTTP_403_FORBIDDEN)
-        if Seminar.objects.get(id=seminar_id).participant_count > Seminar.objects.get(id=seminar_id).capacity:
+        if Seminar.objects.get(id=seminar_id).participant_count >= Seminar.objects.get(id=seminar_id).capacity:
             raise CustomException("세미나 정원이 찼습니다.", status.HTTP_400_BAD_REQUEST)
         
         
