@@ -278,6 +278,8 @@ class PostUserLogin(TestCase):
                                     data=self.post_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
+        print(data['token'])
+        print(self.user_1_rawtoken)
         self.assertEqual(data['token'], self.user_1_rawtoken)
 
 # GET /api/v1/user/me/

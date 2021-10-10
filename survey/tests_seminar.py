@@ -1232,3 +1232,43 @@ class DeleteSeminarUser(TestCase):
                                     data=request_data)
                                     
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_seminar_user_droppedRedrop(self):
+        request_data = {
+            "name" : f"seminar_1",
+            "capacity" : 10,
+            "count" : 5,
+            "time" : "14:30",
+            "online" : "True",
+        }
+
+        with transaction.atomic():
+            response = self.client.post('/api/v1/seminar/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"inst_1_token"),
+                                    data=request_data)
+        data = response.json()
+        seminar_id = data['id']
+
+        request_data = {
+            "role" : "participant",
+        }
+        with transaction.atomic():
+            response = self.client.post(f'/api/v1/seminar/{seminar_id}/user/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"part_1_token"),
+                                    data=request_data)
+        
+        with transaction.atomic():
+            response = self.client.delete(f'/api/v1/seminar/{seminar_id}/user/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"part_1_token"),
+                                    )
+        
+        with transaction.atomic():
+            response = self.client.delete(f'/api/v1/seminar/{seminar_id}/user/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"part_1_token"),
+                                    )
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

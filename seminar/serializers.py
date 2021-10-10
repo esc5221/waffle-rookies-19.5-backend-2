@@ -23,6 +23,7 @@ class SeminarSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     time = serializers.TimeField(format='%H:%M',input_formats=['%H:%M',])
     online = serializers.BooleanField(default=True)
+    capacity  = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Seminar
@@ -76,7 +77,7 @@ class SeminarSerializer(serializers.ModelSerializer):
         count = data.get('count')
         time = data.get('time') 
 
-        if capacity and capacity <= 0: raise CustomException("capacity가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
+        #if capacity and capacity <= 0: raise CustomException("capacity가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
         if self.instance != None:
             parti_count = self.instance.participant_count
             if capacity and capacity < parti_count: 

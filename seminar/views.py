@@ -85,8 +85,10 @@ class SeminarViewSet(viewsets.GenericViewSet):
                 userseminar = UserSeminar.objects.get(user=user_id,seminar=pk)
             except :
                 return Response(self.get_serializer(seminar).data,status=status.HTTP_200_OK)
+            if userseminar.is_active == False:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data='이미 드랍한 세미나입니다.')
             if userseminar.role == 'instructor':
-                return Response(status=status.HTTP_403_FORBIDDEN, data='참여자들을 버릴 수 없습니다')
+                return Response(status=status.HTTP_403_FORBIDDEN, data='참여자들을 버릴 수 없습니다.')
 
             us_data = {    
                 'is_active' : False,
@@ -120,7 +122,7 @@ class SeminarViewSet(viewsets.GenericViewSet):
             'user' : request.user.id,
             'seminar' : seminar['id'],
             'role' : 'instructor',
-            'joined_at' : timezone.now,
+            'joined_at' : timezone.now(),
             'is_active' : True
         }
         us_serializer = UserSeminarSerializer(data=us_data)

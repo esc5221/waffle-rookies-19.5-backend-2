@@ -108,13 +108,10 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         first_name = data.get('first_name')
         last_name = data.get('last_name')
-        year = data.get('year')
         if bool(first_name) ^ bool(last_name):
             raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
         if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
             raise serializers.ValidationError("이름에 숫자가 들어갈 수 없습니다.")
-        if year and year <= 0:
-            raise serializers.ValidationError("year; 양의 정수만 가능합니다.")
         return super().validate(data)
     
     def create(self, validated_data):
@@ -172,6 +169,7 @@ class ParticipantProfileSerializer(serializers.ModelSerializer):
         return participant
 
 class InstructorProfileSerializer(serializers.ModelSerializer):
+    year = serializers.IntegerField(min_value=0)
     class Meta:
         model = InstructorProfile
         fields = (
@@ -181,9 +179,6 @@ class InstructorProfileSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if data.get('year')!=None :
-            if not int(data.get('year')) > 0:
-                raise serializers.ValidationError("연차가 양수가 아닙니다.")
         return data
 
     def create(self, validated_data):
