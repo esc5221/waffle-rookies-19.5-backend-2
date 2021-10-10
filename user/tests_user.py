@@ -1,3 +1,6 @@
+import re
+import json
+from django.http import request
 from factory.django import DjangoModelFactory
 from django.db import transaction
 
@@ -26,11 +29,14 @@ class UserFactory(DjangoModelFactory):
         user.save()
         if is_instructor:
             user.instructor = InstructorProfile.objects.create()
+            user.instructor.save()
         if is_participant:
             user.participant = ParticipantProfile.objects.create()
+            user.participant.save()
+        user.save()
         return user
 
-
+# POST /api/v1/signup/
 class PostUserTestCase(TestCase):
 
     @classmethod
@@ -112,7 +118,7 @@ class PostUserTestCase(TestCase):
         instructor_count = InstructorProfile.objects.count()
         self.assertEqual(instructor_count, 0)
 
-
+# PUT /api/v1/user/me/
 class PutUserMeTestCase(TestCase):
 
     @classmethod
@@ -249,8 +255,7 @@ class PutUserMeTestCase(TestCase):
         instructor_user = User.objects.get(username='inst123')
         self.assertEqual(instructor_user.email, 'bdv111@naver.com')
 
-
-# POST /api/v1/user/login/
+# POST /api/v1/login/
 class PostUserLogin(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -276,7 +281,6 @@ class PostUserLogin(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data['token'], self.user_1_rawtoken)
-
 
 # GET /api/v1/user/{user_id}/
 class GetUser(TestCase):
@@ -316,20 +320,25 @@ class GetUser(TestCase):
         cls.username_list = ['part', 'inst', 'partinst']
 
     def test_get_user(self):
+        
         for i in range(1,3):
-            response = self.client.get('/api/v1/user/me/', 
-                                      content_type='application/json', 
-                                      HTTP_AUTHORIZATION=getattr(self,f"user_{i}_token"))
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            data = response.json()
-            self.assertEqual(data['username'], self.username_list[i-1])
-            self.assertEqual(data['email'], f"user_{i}@snu.ac.kr")
-            self.assertEqual(data['first_name'], f'first_{i}')
-            self.assertEqual(data['last_name'], f'last_{i}')
-            self.assertIn("last_login", data)
-            self.assertIn("date_joined", data)
+            with transaction.atomic():
+                response = self.client.get('/api/v1/user/me/', 
+                                        content_type='application/json', 
+                                        HTTP_AUTHORIZATION=getattr(self,f"user_{i}_token"))
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                data = response.json()
+                self.assertEqual(data['username'], self.username_list[i-1])
+                self.assertEqual(data['email'], f"user_{i}@snu.ac.kr")
+                self.assertEqual(data['first_name'], f'first_{i}')
+                self.assertEqual(data['last_name'], f'last_{i}')
+                self.assertIn("last_login", data)
+                self.assertIn("date_joined", data)
 
-# GET /api/v1/user/me/
+
+ # GET /api/v1/user/me/
+
+# GET /api/v1/user/me/  <= 중복 API?
 class GetUserme(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -342,31 +351,138 @@ class GetUserme(TestCase):
             is_participant=True
         )
 
+@tag("todo")
 # POST /api/v1/user/participant/
 class PostUserParticipant(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.participant = UserFactory(
+        for i in range(1,4) : 
+            user = UserFactory(
+                username=f"inst_{i}",
+                password='password',
+                first_name='first',
+                last_name='last',
+                email=f'inst_{i}@snu.ac.kr',
+                is_instructor=True
+            )
+            setattr(cls, f"inst_{i}", user)
+            token = 'JWT ' + jwt_token_of(User.objects.get(email=f'inst_{i}@snu.ac.kr'))
+            setattr(cls, f"inst_{i}_token", token)
+
+        cls.part = UserFactory(
             username='part',
             password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
+            first_name='first_2',
+            last_name='last_2',
+            email='part@snu.ac.kr',
             is_participant=True
         )
+        cls.part_token = 'JWT ' + jwt_token_of(User.objects.get(email='part@snu.ac.kr'))
+
+        cls.partinst = UserFactory(
+            username='partinst',
+            password='password',
+            first_name='first_3',
+            last_name='last_3',
+            email='partinst@snu.ac.kr',
+            is_instructor=True,
+            is_participant=True
+        )
+        cls.partinst_token = 'JWT ' + jwt_token_of(User.objects.get(email='partinst@snu.ac.kr'))
+
+    def test_post_user_participant_byNoneParticipant(self):
+        
+        # Test with different body - changing "accepted" and "university"
+        for i in range(1,4):
+            if i==0 : request_data = {}
+            elif i==1 : request_data = {"accepted" : "False",}
+            else : request_data = {"university": "서울대학교",}
+
+            with transaction.atomic():
+                response = self.client.post('/api/v1/user/participant/', 
+                                        content_type='application/json', 
+                                        HTTP_AUTHORIZATION=getattr(self,f"inst_{i}_token"),data=request_data)
+            
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            data = response.json()
+            self.assertEqual(data['username'], f"inst_{i}")
+            self.assertEqual(data['email'], f"inst_{i}@snu.ac.kr")
+            self.assertEqual(data['first_name'], f'first')
+            self.assertEqual(data['last_name'], f'last')
+            self.assertIn("last_login", data)
+            self.assertIn("date_joined", data)
+            self.assertIn("participant", data)
+            
+            participant_data = data.get("participant")
+            self.assertIn("id", participant_data)
+            self.assertIn("seminars", participant_data)
+
+            if i==0 : 
+                self.assertEqual(participant_data['university'], "")
+                self.assertEqual(participant_data['accepted'], True)
+            elif i==1 :
+                self.assertEqual(participant_data['university'], "")
+                self.assertEqual(participant_data['accepted'], False)
+            else : 
+                self.assertEqual(participant_data['university'], "서울대학교")
+                self.assertEqual(participant_data['accepted'], True)
+
+    def test_post_user_participant_byAlreadyParticipant(self):
+        
+        # User with ParticipantProfile
+        with transaction.atomic():
+            response = self.client.post('/api/v1/user/participant/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=self.part_token)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # User with InstructorProfile and ParticipantProfile
+        with transaction.atomic():
+            response = self.client.post('/api/v1/user/participant/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=self.partinst_token)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # User with InstructorProfile requests again
+        with transaction.atomic():
+            response = self.client.post('/api/v1/user/participant/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=self.inst_1_token)
+            response = self.client.post('/api/v1/user/participant/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=self.inst_1_token)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 # POST /api/v1/seminar/
 class PostSeminar(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
+        for i in range(1,4) : 
+            user = UserFactory(
+                username=f"inst_{i}",
+                password='password',
+                first_name='first',
+                last_name='last',
+                email=f'inst_{i}@snu.ac.kr',
+                is_instructor=True
+            )
+            setattr(cls, f"inst_{i}", user)
+            token = 'JWT ' + jwt_token_of(User.objects.get(email=f'inst_{i}@snu.ac.kr'))
+            setattr(cls, f"inst_{i}_token", token)
+
+        for i in range(1,4) : 
+            user = UserFactory(
+                username=f"part_{i}",
+                password='password',
+                first_name='first',
+                last_name='last',
+                email=f'part_{i}@snu.ac.kr',
+                is_participant=True
+            )
+            setattr(cls, f"part_{i}", user)
+            token = 'JWT ' + jwt_token_of(User.objects.get(email=f'part_{i}@snu.ac.kr'))
+            setattr(cls, f"part_{i}_token", token)
 
 # PUT /api/v1/seminar/{seminar_id}/
 class PutSeminar(TestCase):

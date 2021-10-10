@@ -69,7 +69,7 @@ class UserViewSet(viewsets.GenericViewSet):
     def participant(self, request):
         user = request.user
         data = request.data.copy()
-
+        
         if user.participant != None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data='이미 참여자입니다.')
         sub_serializer = ParticipantProfileSerializer(data=data, partial=True)
@@ -80,7 +80,7 @@ class UserViewSet(viewsets.GenericViewSet):
         user.participant = sub_serializer.save()
         user.save()
 
-        return Response(self.get_serializer(user).data)
+        return Response(status=status.HTTP_201_CREATED, data=UserWithSeminarSerializer(user).data)
 
     def update(self, request, pk=None):
         if pk != 'me':

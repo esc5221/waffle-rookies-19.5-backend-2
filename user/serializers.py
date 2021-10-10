@@ -191,14 +191,15 @@ class InstructorProfileSerializer(serializers.ModelSerializer):
         return instructor
 
 class UserWithSeminarSerializer(UserSerializer):
+
     def get_participant(self, user):
         if user.participant:
-            return ParticipantProfileWithSeminarSerializer(user.participant).data
+            return ParticipantProfileWithSeminarSerializer(user.participant, context=self.context).data
         return None
 
     def get_instructor(self, user):
         if user.instructor:
-            return InstructorProfileWithSeminarSerializer(user.instructor).data
+            return InstructorProfileWithSeminarSerializer(user.instructor, context=self.context).data
         return None
 
 class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
