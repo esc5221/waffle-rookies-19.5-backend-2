@@ -107,12 +107,7 @@ class SeminarViewSet(viewsets.GenericViewSet):
         if request.user.is_anonymous:
             return Response(status=status.HTTP_403_FORBIDDEN, data='로그인이 필요합니다.')
 
-        roles = request.user.role.split(",")
-        check_ins = False
-        for role in roles:
-            if role == "instructor":
-                check_ins = True
-        if check_ins is False :
+        if request.user.instructor == None:
             return Response(status=status.HTTP_403_FORBIDDEN, data='Instructor가 아닙니다.')
 
         data = request.data.copy()

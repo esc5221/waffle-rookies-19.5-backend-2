@@ -13,8 +13,6 @@ import json
 from user.models import InstructorProfile, ParticipantProfile
 from user.serializers import jwt_token_of
 
-
-
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
@@ -282,7 +280,7 @@ class PostUserLogin(TestCase):
         data = response.json()
         self.assertEqual(data['token'], self.user_1_rawtoken)
 
-# GET /api/v1/user/{user_id}/
+# GET /api/v1/user/me/
 class GetUser(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -335,23 +333,6 @@ class GetUser(TestCase):
                 self.assertIn("last_login", data)
                 self.assertIn("date_joined", data)
 
-
- # GET /api/v1/user/me/
-
-# GET /api/v1/user/me/  <= 중복 API?
-class GetUserme(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
-
-@tag("todo")
 # POST /api/v1/user/participant/
 class PostUserParticipant(TestCase):
     @classmethod
@@ -401,7 +382,8 @@ class PostUserParticipant(TestCase):
             with transaction.atomic():
                 response = self.client.post('/api/v1/user/participant/', 
                                         content_type='application/json', 
-                                        HTTP_AUTHORIZATION=getattr(self,f"inst_{i}_token"),data=request_data)
+                                        HTTP_AUTHORIZATION=getattr(self,f"inst_{i}_token"),
+                                        data=request_data)
             
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             data = response.json()
@@ -454,90 +436,6 @@ class PostUserParticipant(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-# POST /api/v1/seminar/
-class PostSeminar(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        for i in range(1,4) : 
-            user = UserFactory(
-                username=f"inst_{i}",
-                password='password',
-                first_name='first',
-                last_name='last',
-                email=f'inst_{i}@snu.ac.kr',
-                is_instructor=True
-            )
-            setattr(cls, f"inst_{i}", user)
-            token = 'JWT ' + jwt_token_of(User.objects.get(email=f'inst_{i}@snu.ac.kr'))
-            setattr(cls, f"inst_{i}_token", token)
-
-        for i in range(1,4) : 
-            user = UserFactory(
-                username=f"part_{i}",
-                password='password',
-                first_name='first',
-                last_name='last',
-                email=f'part_{i}@snu.ac.kr',
-                is_participant=True
-            )
-            setattr(cls, f"part_{i}", user)
-            token = 'JWT ' + jwt_token_of(User.objects.get(email=f'part_{i}@snu.ac.kr'))
-            setattr(cls, f"part_{i}_token", token)
-
-# PUT /api/v1/seminar/{seminar_id}/
-class PutSeminar(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
-
-# GET /api/v1/seminar/{seminar_id}/
-class GetSeminar(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
-
-# GET /api/v1/seminar/
-class GetSeminarList(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
-
-# POST /api/v1/seminar/{seminar_id}/user/
-class PostSeminarUser(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.participant = UserFactory(
-            username='part',
-            password='password',
-            first_name='Davin',
-            last_name='Byeon',
-            email='bdv111@snu.ac.kr',
-            is_participant=True
-        )
-
-# DELETE /api/v1/seminar/{seminar_id}/user/
-class DeleteSeminaruser(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.participant = UserFactory(
