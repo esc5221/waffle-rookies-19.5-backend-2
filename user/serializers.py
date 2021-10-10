@@ -224,12 +224,12 @@ class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
         return response
 
 class InstructorProfileWithSeminarSerializer(InstructorProfileSerializer):
-    seminars = serializers.SerializerMethodField()
+    charge = serializers.SerializerMethodField()
     class Meta(InstructorProfileSerializer.Meta):
         fields = InstructorProfileSerializer.Meta.fields \
-                + ('seminars',)
+                + ('charge',)
 
-    def get_seminars(self, instructor):
+    def get_charge(self, instructor):
         queryset = Seminar.objects.filter(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
         response = queryset.annotate(
             joined_at=F('userseminar__joined_at')

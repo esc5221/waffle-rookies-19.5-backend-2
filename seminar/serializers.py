@@ -71,19 +71,18 @@ class SeminarSerializer(serializers.ModelSerializer):
         return response
 
     def validate(self, data):
-        name = data.get('name', None)
-        capacity = data.get('capacity', None)
-        count = data.get('count', None)
-        time = data.get('time', None) 
+        name = data.get('name')
+        capacity = data.get('capacity')
+        count = data.get('count')
+        time = data.get('time') 
 
-        if capacity <= 0: raise CustomException("capacity가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
+        if capacity and capacity <= 0: raise CustomException("capacity가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
         if self.instance != None:
             parti_count = self.instance.participant_count
-            if capacity < parti_count: 
+            if capacity and capacity < parti_count: 
                 raise CustomException("capacity가 현재 참여자 보다 작을 수 없습니다. 현재 인원 : " + str(parti_count) \
                     , status.HTTP_400_BAD_REQUEST)
-        if count <= 0: raise CustomException("count가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
-        
+        if count and count <= 0: raise CustomException("count가 양수가 아닙니다.", status.HTTP_400_BAD_REQUEST)
 
         return data
 

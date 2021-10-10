@@ -24,13 +24,10 @@ class SeminarViewSet(viewsets.GenericViewSet):
         return self.permission_classes
 
     def list(self, request):
-        name = self.request.query_params.get('name')
+        name = self.request.query_params.get('name',"")
         order = self.request.query_params.get('order')
 
-        if name :
-            seminars = Seminar.objects.filter(name__contains=name)
-        else :
-            seminars = self.get_queryset()
+        seminars = Seminar.objects.filter(name__contains=name)
 
         if order=='earliest' :
             seminars = seminars.order_by('created_at')
@@ -134,13 +131,17 @@ class SeminarViewSet(viewsets.GenericViewSet):
     
     def update(self, request, pk):
         user = request.user
-        #userSeminar = request.user.userseminar
-        userseminar = UserSeminar.objects.get(seminar_id=pk,role='instructor')
+        try : 
+            userseminar = UserSeminar.objects.get(seminar_id=pk, role='instructor')
+        except :
+            return Response(status=status.HTTP_404_NOT_FOUND, data='세미나가 존재하지 않습니다.')
+        
         if userseminar.user != user:
             return Response(status=status.HTTP_403_FORBIDDEN, data='Instructor가 아닙니다.')
 
-        serializer = self.get_serializer(userseminar.seminar, data=request.data, partial=True)
+        seminar = userseminar.seminar
+        serializer = self.get_serializer(seminar, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.update(userseminar.seminar, serializer.validated_data)
+        serializer.update(seminar, serializer.validated_data)
         
         return Response(status=status.HTTP_200_OK, data=serializer.data)
