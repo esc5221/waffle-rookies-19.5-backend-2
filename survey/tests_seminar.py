@@ -149,7 +149,7 @@ class PostSeminar(TestCase):
          
 
 # PUT /api/v1/seminar/{seminar_id}/
-@tag("todo")
+
 class PutSeminar(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -259,8 +259,9 @@ class PutSeminar(TestCase):
                                         HTTP_AUTHORIZATION=getattr(self,f"part_1_token"),
                                         data=request_data)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-            
+   
 # GET /api/v1/seminar/{seminar_id}/
+@tag("todo")
 class GetSeminar(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -291,37 +292,48 @@ class GetSeminar(TestCase):
             setattr(cls, f"part_{i}_token", token)
 
     def test_get_seminar_id(self):
-        for i in range(1,2):
-            request_data = {
-                "name" : f"seminar_{i}",
-                "capacity" : 10,
-                "count" : 5,
-                "time" : "14:30",
-                "online" : "True",
-            }
+        request_data = {
+            "name" : f"seminar_1",
+            "capacity" : 10,
+            "count" : 5,
+            "time" : "14:30",
+            "online" : "True",
+        }
 
-            with transaction.atomic():
-                response = self.client.post('/api/v1/seminar/', 
-                                        content_type='application/json', 
-                                        HTTP_AUTHORIZATION=getattr(self,f"inst_{i}_token"),
-                                        data=request_data)
-            
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            data = response.json()
-            data['id']
-            self.assertEqual(data['name'], f"seminar_{i}")
-            self.assertEqual(data['capacity'], 10)
-            self.assertEqual(data['count'], 5)
-            self.assertEqual(data['time'], "14:30")
-            
-            instructors_data = data.get("instructors")[0]
-            self.assertIn("id", instructors_data)
-            self.assertEqual(instructors_data['username'], f"inst_{i}")
-            self.assertEqual(instructors_data['email'], f"inst_{i}@snu.ac.kr")
-            self.assertEqual(instructors_data['first_name'], f'first')
-            self.assertEqual(instructors_data['last_name'], f'last')
-            self.assertIn("joined_at", instructors_data)
-            self.assertIn("participants", data)
+        with transaction.atomic():
+            response = self.client.post('/api/v1/seminar/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"inst_1_token"),
+                                    data=request_data)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()
+        seminar_id = data['id']
+
+        # try with different user
+        with transaction.atomic():
+            response = self.client.get(f'/api/v1/seminar/{seminar_id}/', 
+                                    content_type='application/json', 
+                                    HTTP_AUTHORIZATION=getattr(self,f"inst_2_token"),
+                                    data=request_data)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertIn("id", data)
+        self.assertEqual(data['name'], f"seminar_1")
+        self.assertEqual(data['capacity'], 10)
+        self.assertEqual(data['count'], 5)
+        self.assertEqual(data['time'], "14:30")
+        
+        instructors_data = data.get("instructors")[0]
+        self.assertIn("id", instructors_data)
+        self.assertEqual(instructors_data['username'], f"inst_1")
+        self.assertEqual(instructors_data['email'], f"inst_1@snu.ac.kr")
+        self.assertEqual(instructors_data['first_name'], f'first')
+        self.assertEqual(instructors_data['last_name'], f'last')
+        self.assertIn("joined_at", instructors_data)
+        self.assertIn("participants", data)
+        self.assertEqual(data['online'], True)
 
 
 # GET /api/v1/seminar/
