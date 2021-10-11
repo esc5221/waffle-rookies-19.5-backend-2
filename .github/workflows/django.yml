@@ -30,7 +30,7 @@ jobs:
 
     - name: MySQL Grant
       run: | 
-        sudo mysql -h 127.0.0.1 --port 3306 -u waffle-backend -pseminar -e """GRANT ALL PRIVILEGES ON *.* TO 'waffle-backend'@'%' WITH GRANT OPTION;"""
+        sudo mysql -h 127.0.0.1 --port 3306 -u root -ppassword -e """GRANT ALL PRIVILEGES ON *.* TO 'waffle-backend'@'%' WITH GRANT OPTION;"""
                 
     - name: Set up Python 3.8.3
       uses: actions/setup-python@v2
