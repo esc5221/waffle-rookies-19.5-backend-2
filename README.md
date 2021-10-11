@@ -90,3 +90,5 @@ TOTAL                                                   1573   76   95%
 
 <br>
 
+### **Github Actions**
+![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/main/results/Django_CI_passed.JPG?raw=true)
