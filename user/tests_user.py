@@ -265,20 +265,19 @@ class PostUserLogin(TestCase):
             email='user_1@snu.ac.kr',
             is_participant=True
         )
-        cls.user_1_rawtoken = jwt_token_of(User.objects.get(email='user_1@snu.ac.kr'))
 
         cls.post_data = {
             'email': 'user_1@snu.ac.kr',
             'password': 'password'
         }
 
-    def test_get_user(self):
+    def test_post_login(self):
         response = self.client.post('/api/v1/login/', 
                                     content_type='application/json',
                                     data=self.post_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(data['token'], self.user_1_rawtoken)
+        self.assertEqual(data['token'], jwt_token_of(User.objects.get(email='user_1@snu.ac.kr')))
 
 # GET /api/v1/user/me/
 class GetUser(TestCase):
