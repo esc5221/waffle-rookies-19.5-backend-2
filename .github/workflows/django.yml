@@ -27,7 +27,8 @@ jobs:
       run: |
         mysql --version
         sudo apt-get install -y mysql-client
-        mysql --host 127.0.0.1 --port 3306 -uroot -ppassword -e "SHOW DATABASES"
+        mysql GRANT ALL PRIVILEGES ON waffle_backend_2.* TO 'waffle-backend'@'%' WITH GRANT OPTION;
+        
     - name: Set up Python 3.8.3
       uses: actions/setup-python@v2
       with:
