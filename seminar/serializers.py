@@ -23,7 +23,7 @@ class SeminarSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     time = serializers.TimeField(format='%H:%M',input_formats=['%H:%M',])
     online = serializers.BooleanField(default=True)
-    capacity  = serializers.IntegerField(min_value=1)
+    capacity = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Seminar
