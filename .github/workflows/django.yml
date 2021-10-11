@@ -27,8 +27,11 @@ jobs:
       run: |
         mysql --version
         sudo apt-get install -y mysql-client
-        mysql GRANT ALL PRIVILEGES ON waffle_backend_2.* TO 'waffle-backend'@'%' WITH GRANT OPTION;
-        
+
+    - uses: actions/checkout@v1
+    - name: MySQL Grant
+    - run: mysql -h 127.0.0.1 --port 8888 -u root -ppassword -e 'GRANT ALL PRIVILEGES ON waffle_backend_2.* TO 'waffle-backend'@'%' WITH GRANT OPTION;'
+                
     - name: Set up Python 3.8.3
       uses: actions/setup-python@v2
       with:
