@@ -225,7 +225,8 @@ class InstructorProfileWithSeminarSerializer(InstructorProfileSerializer):
                 + ('charge',)
 
     def get_charge(self, instructor):
-        queryset = Seminar.objects.filter(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
+        try : queryset = Seminar.objects.get(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
+        except : return None
         response = queryset.annotate(
             joined_at=F('userseminar__joined_at')
             ).values(
