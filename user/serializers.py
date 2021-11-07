@@ -105,6 +105,15 @@ class UserSerializer(serializers.ModelSerializer):
             return InstructorProfileSerializer(user.instructor, context=self.context).data
         return None
 
+    def validate(self, data):
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        if bool(first_name) ^ bool(last_name):
+            raise serializers.ValidationError("성과 이름 중에 하나만 입력할 수 없습니다.")
+        if first_name and last_name and not (first_name.isalpha() and last_name.isalpha()):
+            raise serializers.ValidationError("이름에 숫자가 들어갈 수 없습니다.")
+        return super().validate(data)
+    
     def create(self, validated_data):
         user = super().create(validated_data)
         return user
@@ -160,6 +169,7 @@ class ParticipantProfileSerializer(serializers.ModelSerializer):
         return participant
 
 class InstructorProfileSerializer(serializers.ModelSerializer):
+    year = serializers.IntegerField(min_value=0)
     class Meta:
         model = InstructorProfile
         fields = (
@@ -169,9 +179,6 @@ class InstructorProfileSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if data.get('year')!=None :
-            if not int(data.get('year')) > 0:
-                raise serializers.ValidationError("연차가 양수가 아닙니다.")
         return data
 
     def create(self, validated_data):
@@ -179,14 +186,15 @@ class InstructorProfileSerializer(serializers.ModelSerializer):
         return instructor
 
 class UserWithSeminarSerializer(UserSerializer):
+
     def get_participant(self, user):
         if user.participant:
-            return ParticipantProfileWithSeminarSerializer(user.participant).data
+            return ParticipantProfileWithSeminarSerializer(user.participant, context=self.context).data
         return None
 
     def get_instructor(self, user):
         if user.instructor:
-            return InstructorProfileWithSeminarSerializer(user.instructor).data
+            return InstructorProfileWithSeminarSerializer(user.instructor, context=self.context).data
         return None
 
 class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
@@ -211,13 +219,14 @@ class ParticipantProfileWithSeminarSerializer(ParticipantProfileSerializer):
         return response
 
 class InstructorProfileWithSeminarSerializer(InstructorProfileSerializer):
-    seminars = serializers.SerializerMethodField()
+    charge = serializers.SerializerMethodField()
     class Meta(InstructorProfileSerializer.Meta):
         fields = InstructorProfileSerializer.Meta.fields \
-                + ('seminars',)
+                + ('charge',)
 
-    def get_seminars(self, instructor):
-        queryset = Seminar.objects.filter(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
+    def get_charge(self, instructor):
+        try : queryset = Seminar.objects.get(userseminar__role='instructor',userseminar__user__instructor=instructor.id)
+        except : return None
         response = queryset.annotate(
             joined_at=F('userseminar__joined_at')
             ).values(

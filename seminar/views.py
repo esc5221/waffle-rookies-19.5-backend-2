@@ -24,13 +24,10 @@ class SeminarViewSet(viewsets.GenericViewSet):
         return self.permission_classes
 
     def list(self, request):
-        name = self.request.query_params.get('name')
+        name = self.request.query_params.get('name',"")
         order = self.request.query_params.get('order')
 
-        if name :
-            seminars = Seminar.objects.filter(name__contains=name)
-        else :
-            seminars = self.get_queryset()
+        seminars = Seminar.objects.filter(name__contains=name)
 
         if order=='earliest' :
             seminars = seminars.order_by('created_at')
@@ -88,8 +85,10 @@ class SeminarViewSet(viewsets.GenericViewSet):
                 userseminar = UserSeminar.objects.get(user=user_id,seminar=pk)
             except :
                 return Response(self.get_serializer(seminar).data,status=status.HTTP_200_OK)
+            if userseminar.is_active == False:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data='이미 드랍한 세미나입니다.')
             if userseminar.role == 'instructor':
-                return Response(status=status.HTTP_403_FORBIDDEN, data='참여자들을 버릴 수 없습니다')
+                return Response(status=status.HTTP_403_FORBIDDEN, data='참여자들을 버릴 수 없습니다.')
 
             us_data = {    
                 'is_active' : False,
@@ -107,12 +106,7 @@ class SeminarViewSet(viewsets.GenericViewSet):
         if request.user.is_anonymous:
             return Response(status=status.HTTP_403_FORBIDDEN, data='로그인이 필요합니다.')
 
-        roles = request.user.role.split(",")
-        check_ins = False
-        for role in roles:
-            if role == "instructor":
-                check_ins = True
-        if check_ins is False :
+        if request.user.instructor == None:
             return Response(status=status.HTTP_403_FORBIDDEN, data='Instructor가 아닙니다.')
 
         data = request.data.copy()
@@ -128,7 +122,7 @@ class SeminarViewSet(viewsets.GenericViewSet):
             'user' : request.user.id,
             'seminar' : seminar['id'],
             'role' : 'instructor',
-            'joined_at' : timezone.now,
+            'joined_at' : timezone.now(),
             'is_active' : True
         }
         us_serializer = UserSeminarSerializer(data=us_data)
@@ -139,13 +133,17 @@ class SeminarViewSet(viewsets.GenericViewSet):
     
     def update(self, request, pk):
         user = request.user
-        #userSeminar = request.user.userseminar
-        userseminar = UserSeminar.objects.get(seminar_id=pk,role='instructor')
+        try : 
+            userseminar = UserSeminar.objects.get(seminar_id=pk, role='instructor')
+        except :
+            return Response(status=status.HTTP_404_NOT_FOUND, data='세미나가 존재하지 않습니다.')
+        
         if userseminar.user != user:
             return Response(status=status.HTTP_403_FORBIDDEN, data='Instructor가 아닙니다.')
 
-        serializer = self.get_serializer(userseminar.seminar, data=request.data, partial=True)
+        seminar = userseminar.seminar
+        serializer = self.get_serializer(seminar, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.update(userseminar.seminar, serializer.validated_data)
+        serializer.update(seminar, serializer.validated_data)
         
         return Response(status=status.HTTP_200_OK, data=serializer.data)
