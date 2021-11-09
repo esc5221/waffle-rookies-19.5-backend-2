@@ -7,7 +7,7 @@ _________________________________________
 - HTTP Domain: http://wafl.shop
 
 ## **1번** 
-![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/1.jpg?raw=true)
+![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/1.JPG?raw=true)
 
 
 ## **2번** 
@@ -58,7 +58,7 @@ Redirecting to /bin/systemctl restart nginx.service
 ```
 
 ## **3번** 
-![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.jpg?raw=true)
+![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.JPG?raw=true)
 
 ## 느낀점
 * 서버에서 환경 설정을 일일히 하는게 상당히 고역이라는 점이 느껴졌습니다. 특히 EC2에서 mysql을 mariadb로 사용하는 것 떄문에 혼동이 있어 시간을 잡아먹었던 것 같습니다. 나머지는 대부분 이전 과제를 진행하며 만나본 오류들이어서 방법을 알고 디버깅할 수 있었지만, 그래도 환경 설정이 쉽지는 않은 것 같습니다. 
