@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import datetime
 import os
+import sys
 from pathlib import Path
 
 SITE_ID = 2
@@ -88,17 +89,28 @@ WSGI_APPLICATION = 'waffle_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'database-1.cf0lxyb1cxw5.us-east-2.rds.amazonaws.com',
-        'PORT': 3306,
-        'NAME': 'waffle_backend_2',  # database name 변경
-        'USER': 'waffle-backend',
-        'PASSWORD': 'seminar',
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '127.0.0.1',
+            'PORT': 3306,
+            'NAME': 'waffle_backend_2',  # database name 변경
+            'USER': 'waffle-backend',
+            'PASSWORD': 'seminar',
+        }
     }
-}
-
+else :
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': 'database-1.cf0lxyb1cxw5.us-east-2.rds.amazonaws.com',
+            'PORT': 3306,
+            'NAME': 'waffle_backend_2',  # database name 변경
+            'USER': 'waffle-backend',
+            'PASSWORD': 'seminar',
+        }
+    }
 # You should clarify which field type to use when auto-creating primary keys; Since Django 3.2
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
