@@ -1,94 +1,58 @@
-# 와플스튜디오 Backend Seminar[3] 과제
+# 와플스튜디오 Backend Seminar[4] 과제
 
 ## esc5221 / 최병욱
 _________________________________________
 
+## **1번** 
+![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/1.jpg?raw=true)
 
-## **TEST branch**
-### **TEST FILES**
-- **`user/tests_user.py`**
-- **`seminar/tests_sseminar.py`**
-### **API List**
-- POST /api/v1/signup/
-- POST /api/v1/user/login/
-- PUT /api/v1/user/me/
-- GET /api/v1/user/{user_id}/
-- GET /api/v1/user/me/
-- POST /api/v1/user/participant/
-- POST /api/v1/seminar/
-- PUT /api/v1/seminar/{seminar_id}/
-- GET /api/v1/seminar/{seminar_id}/
-- GET /api/v1/seminar/
-- POST /api/v1/seminar/{seminar_id}/user/
-- DELETE /api/v1/seminar/{seminar_id}/user/
 
-### **Coverage Report**
-<details>
-<summary>details for coverage report</summary>
+## **2번** 
+survey에 foobar 필드 추가하여 commit&push, EC2 인스턴스에서 pull후 `deploy.sh` 실행 결과, 패키치 설치, migration, gunicorn 및 nginx 재시작 등 재배포 시 필요한 동작들이 정확히 수행하는 것을 확인할 수 있습니다.
 
-``` 
-Name                                                    Stmts Miss Cover
---------------------------------------------------------------------------
-manage.py                                                 12    2   83%
-seminar/__init__.py                                        0    0  100%
-seminar/admin.py                                           1    0  100%
-seminar/apps.py                                            4    0  100%
-seminar/migrations/0001_initial.py                         6    0  100%
-seminar/migrations/0002_userseminar_user.py                7    0  100%
-seminar/migrations/0003_auto_20210925_0854.py              4    0  100%
-seminar/migrations/0004_alter_userseminar_joined_at.py     4    0  100%
-seminar/migrations/0005_auto_20210925_1446.py              6    0  100%
-seminar/migrations/0006_seminar_participant_count.py       4    0  100%
-seminar/migrations/0007_auto_20210927_1123.py              4    0  100%
-seminar/migrations/0008_alter_seminar_online.py            4    0  100%
-seminar/migrations/__init__.py                             0    0  100%
-seminar/models.py                                         20    0  100%
-seminar/serializers.py                                    92    1   99%
-seminar/tests.py                                           1    0  100%
-seminar/urls.py                                            7    0  100%
-seminar/views.py                                         104    3   97%
-survey/__init__.py                                         0    0  100%
-survey/admin.py                                            4    0  100%
-survey/apps.py                                             3    0  100%
-survey/management/__init__.py                              0    0  100%
-survey/management/commands/__init__.py                     0    0  100%
-survey/migrations/0001_initial.py                          6    0  100%
-survey/migrations/0002_surveyresult_user.py                7    0  100%
-survey/migrations/__init__.py                              0    0  100%
-survey/models.py                                          19    0  100%
-survey/serializers.py                                     26    8   69%
-survey/tests_seminar.py                                  583    3   99%
-survey/urls.py                                             8    0  100%
-survey/views.py                                           42   21   50%
-user/__init__.py                                           0    0  100%
-user/admin.py                                              1    0  100%
-user/apps.py                                               3    0  100%
-user/migrations/0001_initial.py                            8    0  100%
-user/migrations/0002_user_role.py                          4    0  100%
-user/migrations/0003_auto_20210924_1308.py                 5    0  100%
-user/migrations/0004_auto_20210924_1405.py                 5    0  100%
-user/migrations/0005_auto_20210925_0531.py                 4    0  100%
-user/migrations/0006_alter_instructorprofile_year.py       4    0  100%
-user/migrations/0007_alter_participantprofile_accepted.py  4    0  100%
-user/migrations/0008_remove_user_is_active.py              4    0  100%
-user/migrations/0009_alter_participantprofile_accepted.py  4    0  100%
-user/migrations/__init__.py                                0    0  100%
-user/models.py                                            53    8   85%
-user/serializers.py                                      135   14   90%
-user/tests.py                                              1    0  100%
-user/tests_user.py                                       224    2   99%
-user/urls.py                                               7    0  100%
-user/views.py                                             90   14   84%
-waffle_backend/__init__.py                                 0    0  100%
-waffle_backend/settings.py                                30    0  100%
-waffle_backend/urls.py                                     9    0  100%
-------------------------------------------------------------------------
-TOTAL                                                   1573   76   95%
+``` shell
+[ec2-user@ip-172-31-2-64 waffle-rookies-19.5-backend-2]$ ./deploy/deploy.sh
+Username for 'https://github.com': esc5221
+Password for 'https://esc5221@github.com':
+remote: Enumerating objects: 86, done.
+remote: Counting objects: 100% (86/86), done.
+remote: Compressing objects: 100% (39/39), done.
+remote: Total 66 (delta 27), reused 66 (delta 27), pack-reused 0
+Unpacking objects: 100% (66/66), 30.55 KiB | 2.18 MiB/s, done.
+From https://github.com/esc5221/waffle-rookies-19.5-backend-2
+ * branch            deploy     -> FETCH_HEAD
+   333de83..6c34808  deploy     -> origin/deploy
+Updating 333de83..6c34808
+Fast-forward
+
+ - 중략 -
+
+ waffle_backend/settings.py                                                        |  32 ++++++++++++++++++++++----------
+ 48 files changed, 23 insertions(+), 10 deletions(-)
+Requirement already satisfied: asgiref==3.4.1 in ./venv0/lib/python3.8/site-packages (3.4.1)
+WARNING: You are using pip version 20.2.3; however, version 21.3.1 is available.
+You should consider upgrading via the '/home/ec2-user/waffle-rookies-19.5-backend-2/venv0/bin/python3 -m pip install --upgrade pip' command.
+
+- 중략 - 
+
+Migrations for 'survey':
+  survey/migrations/0003_operatingsystem_foobar.py
+    - Add field foobar to operatingsystem
+System check identified some issues:
+
+Running migrations:
+  Applying survey.0003_operatingsystem_foobar... OK
+System check identified some issues:
+
+- 중략 - 
+
+System check identified 5 issues (0 silenced).
+8000/tcp:             3558  3560
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+Redirecting to /bin/systemctl restart nginx.service
+[ec2-user@ip-172-31-2-64 waffle-rookies-19.5-backend-2]$
 ```
 
-</details>
-
-<br>
-
-### **Github Actions**
-![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/main/results/Django_CI_passed.JPG?raw=true)
+## **3번** 
+![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.jpg?raw=true)
