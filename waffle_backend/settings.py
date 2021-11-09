@@ -29,7 +29,8 @@ SECRET_KEY = '0^k@b1ln%g7l_*6xr*&5&vhgp7r$i&n-db#_!(8*a$n2y1hf4='
 DEBUG = True
 DEBUG_TOOLBAR = os.getenv('DEBUG_TOOLBAR') in ('true', 'True')
 
-ALLOWED_HOSTS = ['ec2-3-12-74-177.us-east-2.compute.amazonaws.com', '3.12.74.177']
+ALLOWED_HOSTS = ['127.0.0.1']
+#,'ec2-3-12-74-177.us-east-2.compute.amazonaws.com', '3.12.74.177']
 
 # Application definition
 
@@ -136,6 +137,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = STATIC_DIR
 
 REST_FRAMEWORK = {
 
