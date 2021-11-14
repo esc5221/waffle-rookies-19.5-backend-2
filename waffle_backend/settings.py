@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'seminar.apps.SeminarConfig',
     'common.apps.CommonConfig',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
