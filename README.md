@@ -11,13 +11,15 @@ _________________________________________
 
 
 ## **2번** 
-![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/final/results/2.JPG?raw=true)
+* HTTP_500_INTERNAL_SERVER_ERROR의 경우, exception_handler의 parameter exc에 "status_code" attribute가 없다는 점을 이용해 500 error를 처리하고, "status_code" attribute가 있는 경우에는 기존 rest_framework에서 제공하는 exception_handler를 사용하도록 하였습니다.
+
+  ![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/final/results/2.JPG?raw=true)
 
 ## **3번** 
-![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.JPG?raw=true)
+* accepted의 값을 True, False로 수정할 수 있도록 하였습니다.
 
-## 느낀점
-* 서버에서 환경 설정을 일일히 하는게 상당히 고역이라는 점이 느껴졌습니다. 특히 EC2에서 mysql을 mariadb로 사용하는 것 떄문에 혼동이 있어 시간을 잡아먹었던 것 같습니다. 나머지는 대부분 이전 과제를 진행하며 만나본 오류들이어서 방법을 알고 디버깅할 수 있었지만, 그래도 환경 설정이 쉽지는 않은 것 같습니다. 
-* 환경 설정 도중, 실수로 일반 유저에게 루트 디렉토리의 권한을 부여해 루트 볼륨을 날리고 새로 환경 설정을 하게 되었습니다. 스냅샷을 찍어놓았으면 좋았겠다는 생각이 들었습니다.
-* settings.py에서 database 지정 시, test와 test가 아닐 때 다르게 지정되도록 설정하였습니다. test시에는 local db에서 해도 상관없기 때문에, local db로 설정하고, 그 외의 경우에는 RDS의 db를 사용하도록 설정했습니다. 통상적으로 이런 식의 설정을 사용하는지 궁금했습니다.
-* 과제 3번에서 도메인 등록을 진행했는데, 노트북에서 도메인 접속이 불가능했습니다. 등록이 제대로 된 건지 확인해보려 nameserver를 지정해 nslookup으로 접속이 되는 것을 확인하고, https://www.whatsmydns.net/에서도 체크를 해보았으나 정상적으로 전파가 된 것을 확인했습니다. 스마트폰을 이용해 lte로 접속하니, 통신사 쪽 네임서버에는 등록이 되어 접속이 잘 되었지만, 노트북은 학교에서 관리하는 네트워크를 사용했기 때문에 학교 쪽 네임서버에는 아직 전파가 안된 것이라고 추측했습니다. 네트워크 과목에서 배운 개념들을 실제로 접해본 좋은 경험이었던 것 같습니다.
+  ![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.JPG?raw=true)
+
+
+## 소감
+* 과제 1~5를 진행하며 django/django_rest 프레임워크, RDBMS, REST API의 개념, test 및 CI, amazon AWS/RDS 사용 및 서버 배포 등을 배워갈 수 있었습니다. Backend에서 처리해야하는 task들을 전반적으로 알아봤지만, 세부적으로 파고들면 배울게 정말 많다고 느꼈습니다. 또한 과제는 혼자서 진행하기 때문에, 협업으로 진행할 시 고려해야할 점들도 배워나가야할 것 같습니다. 과제를 통해 얻은 기본기를 가지고, 토이 프로젝트에서 협업으로 프로젝트를 진행하는 방법을 익혀봐야겠습니다. 세미나 진행하시느라 고생많으셨습니다. 감사합니다.
