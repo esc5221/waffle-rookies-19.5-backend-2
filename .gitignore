@@ -3,8 +3,11 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,macos,windows,linux,django,virtualenv
 
 # Byte-compiled / optimized / DLL files
-*__pycache__*
 *.log
+*__pycache__*
+*/__pycache__*
+*__pycache__/*
+*/__pycache__/*
 
 ### Django ###
 *.pot
