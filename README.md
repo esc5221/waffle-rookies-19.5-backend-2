@@ -18,7 +18,7 @@ _________________________________________
 ## **3번** 
 * accepted의 값을 True, False로 수정할 수 있도록 하였습니다.
 
-  ![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/deploy/results/3.JPG?raw=true)
+  ![Image](https://github.com/esc5221/waffle-rookies-19.5-backend-2/blob/final/results/3.JPG?raw=true)
 
 
 ## 소감
