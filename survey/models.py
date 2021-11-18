@@ -6,6 +6,7 @@ class OperatingSystem(models.Model):
     name = models.CharField(max_length=50, db_index=True)
     description = models.CharField(max_length=200, blank=True)
     price = models.PositiveIntegerField(null=True)
+    foobar = models.PositiveIntegerField(null=True)
 
 
 class SurveyResult(models.Model):
